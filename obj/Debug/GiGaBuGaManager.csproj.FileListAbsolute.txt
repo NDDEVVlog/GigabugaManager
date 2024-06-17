@@ -1,0 +1,11 @@
+C:\Users\Admin\source\repos\GiGaBuGaManager\GiGaBuGaManager\bin\Debug\GiGaBuGaManager.exe.config
+C:\Users\Admin\source\repos\GiGaBuGaManager\GiGaBuGaManager\bin\Debug\GiGaBuGaManager.exe
+C:\Users\Admin\source\repos\GiGaBuGaManager\GiGaBuGaManager\bin\Debug\GiGaBuGaManager.pdb
+C:\Users\Admin\source\repos\GiGaBuGaManager\GiGaBuGaManager\obj\Debug\GiGaBuGaManager.csproj.AssemblyReference.cache
+C:\Users\Admin\source\repos\GiGaBuGaManager\GiGaBuGaManager\obj\Debug\GiGaBuGaManager.Gigabuga.resources
+C:\Users\Admin\source\repos\GiGaBuGaManager\GiGaBuGaManager\obj\Debug\GiGaBuGaManager.Properties.Resources.resources
+C:\Users\Admin\source\repos\GiGaBuGaManager\GiGaBuGaManager\obj\Debug\GiGaBuGaManager.csproj.GenerateResource.cache
+C:\Users\Admin\source\repos\GiGaBuGaManager\GiGaBuGaManager\obj\Debug\GiGaBuGaManager.csproj.CoreCompileInputs.cache
+C:\Users\Admin\source\repos\GiGaBuGaManager\GiGaBuGaManager\obj\Debug\GiGaBuGaManager.exe
+C:\Users\Admin\source\repos\GiGaBuGaManager\GiGaBuGaManager\obj\Debug\GiGaBuGaManager.pdb
+C:\Users\Admin\source\repos\GiGaBuGaManager\GiGaBuGaManager\obj\Debug\GiGaBuGaManager.AdjustTag.resources
