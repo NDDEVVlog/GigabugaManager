@@ -40,6 +40,7 @@
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.adjustProperties = new System.Windows.Forms.RadioButton();
+            this.FindingMode = new System.Windows.Forms.RadioButton();
             this.SuspendLayout();
             // 
             // TagFlow
@@ -127,11 +128,24 @@
             this.adjustProperties.TabStop = true;
             this.adjustProperties.Text = "Adjust Properties";
             this.adjustProperties.UseVisualStyleBackColor = true;
-            this.adjustProperties.CheckedChanged += new System.EventHandler(this.adjustProperties_CheckedChanged_1);
+            //this.adjustProperties.CheckedChanged += new System.EventHandler(this.adjustProperties_CheckedChanged_1);
+            // 
+            // FindingMode
+            // 
+            this.FindingMode.AutoSize = true;
+            this.FindingMode.Location = new System.Drawing.Point(374, 13);
+            this.FindingMode.Name = "FindingMode";
+            this.FindingMode.Size = new System.Drawing.Size(114, 21);
+            this.FindingMode.TabIndex = 7;
+            this.FindingMode.TabStop = true;
+            this.FindingMode.Text = "Finding Mode";
+            this.FindingMode.UseVisualStyleBackColor = true;
+            //this.FindingMode.CheckedChanged += new System.EventHandler(this.FindingMode_CheckedChanged);
             // 
             // Gigabuga
             // 
             this.ClientSize = new System.Drawing.Size(840, 487);
+            this.Controls.Add(this.FindingMode);
             this.Controls.Add(this.adjustProperties);
             this.Controls.Add(this.ListItemView);
             this.Controls.Add(this.AddTagButton);
@@ -157,5 +171,6 @@
         private System.Windows.Forms.ColumnHeader columnHeader3;
         private System.Windows.Forms.ColumnHeader columnHeader4;
         private System.Windows.Forms.RadioButton adjustProperties;
+        private System.Windows.Forms.RadioButton FindingMode;
     }
 }

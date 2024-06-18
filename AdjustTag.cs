@@ -13,6 +13,7 @@ namespace GiGaBuGaManager
             InitializeComponent();
             this.flow = flow;
             myButton = inputbutton;
+            TagName.Text = myButton.Text;
         }
 
         private void AdjustTag_Load(object sender, EventArgs e)
@@ -28,6 +29,7 @@ namespace GiGaBuGaManager
                 Color color = colorDialog1.Color;
                 myButton.ForeColor = color;
                 buttonTextColor.BackColor = color;
+                TagName.ForeColor = color;
             }
         }
 
@@ -53,7 +55,43 @@ namespace GiGaBuGaManager
 
         private void SaveButtonClick(object sender, EventArgs e)
         {
+            // Rename the tag and save
+            string oldTagName = myButton.Text;
+            string newTagName = TagName.Text.Trim();
+
+           
+
+            // Save the tags
             TagManager.Instance.SaveTags(flow);
+            this.Close();
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void DeleteTagButton_Click(object sender, EventArgs e)
+        {
+            // Confirm deletion
+            var confirmResult = MessageBox.Show(
+                "Are you sure to delete this tag?",
+                "Confirm Delete",
+                MessageBoxButtons.YesNo);
+
+            if (confirmResult == DialogResult.Yes)
+            {
+                TagManager.Instance.DeleteTag(myButton.Text, flow);
+                this.Close();
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            var oldName = myButton.Text;
+            
+
+            TagManager.Instance.RenameTag(oldName, TagName.Text, flow);
         }
     }
 }

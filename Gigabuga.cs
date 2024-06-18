@@ -23,7 +23,8 @@ namespace GiGaBuGaManager
 
         private bool adjust = false;
         #endregion
-
+        private bool isFindingMode = false;
+        private List<string> currentSearchTags = new List<string>();
         private Panel CreateDragOverPanel()
         {
             Panel dragOverPanel = new Panel
@@ -71,12 +72,15 @@ namespace GiGaBuGaManager
 
             // Load tags and file items
             TagManager.Instance.LoadTags(TagFlow,TagButton_Click);
+            TagManager.Instance.gigabuga = this;
             LoadFileItems();
             LoadFileFormats();
             FileFormatSelection.Items.Add("None");
             // Create and add the drag over panel
             dragOverPanel = CreateDragOverPanel();
             ListItemView.Controls.Add(dragOverPanel);
+            FindingMode.Click += FindingMode_Click;
+            adjustProperties.Click += AdjustProperties_Click;
         }
 
         #region Save and Load
@@ -121,6 +125,7 @@ namespace GiGaBuGaManager
 
                 // Write the updated entries back to the file
                 File.WriteAllLines(path, lines);
+                GigabugaFinding.Instance.AddSong(filePath, tags);
             }
 
             // Update or add entry in the format-specific file
@@ -148,6 +153,72 @@ namespace GiGaBuGaManager
 
             // Update or add file format in the Fileformat.txt
             UpdateOrAddFileFormat(fileFormatPath, fileFormat);
+        }
+
+        public void RemoveTagFromFileItems(string tagName)
+        {
+            UpdateTagInFileItems(tagName, null); // Passing null to indicate tag removal
+        }
+
+        public void UpdateTagInFileItems(string oldTagName, string newTagName)
+        {
+            // Function to update tags in a specified file
+            void UpdateTagsInFile(string path)
+            {
+                List<string> lines = new List<string>();
+                if (File.Exists(path))
+                {
+                    lines = File.ReadAllLines(path).ToList();
+                }
+
+                for (int i = 0; i < lines.Count; i++)
+                {
+                    string[] parts = lines[i].Split(',');
+                    if (parts.Length >= 3)
+                    {
+                        string tags = parts[2];
+                        List<string> tagList = tags.Split('|')
+                            .Select(t => t.Trim())
+                            .Where(t => !string.IsNullOrWhiteSpace(t))
+                            .ToList();
+
+                        if (tagList.Contains(oldTagName))
+                        {
+                            if (newTagName != null)
+                            {
+                                // Rename the tag
+                                tagList[tagList.IndexOf(oldTagName)] = newTagName;
+                            }
+                            else
+                            {
+                                // Remove the tag
+                                tagList.Remove(oldTagName);
+                            }
+
+                            string updatedTags = string.Join(" | ", tagList);
+                            lines[i] = $"{parts[0]},{parts[1]},{updatedTags}";
+                        }
+                    }
+                }
+
+                // Write the updated entries back to the file
+                File.WriteAllLines(path, lines);
+            }
+
+            // Update tags in the main file
+            UpdateTagsInFile(fileItemsPath);
+
+            // Update tags in the format-specific files
+            foreach (string formatFile in Directory.GetFiles(".", "*.txt"))
+            {
+                if (formatFile != "FileItem.txt" && formatFile != "Tags.txt" && formatFile != "Fileformat.txt")
+                {
+                    UpdateTagsInFile(formatFile);
+                }
+            }
+
+            // Update tags in the ListView
+            LoadFileItems();
         }
 
         private void LoadFileFormats()
@@ -194,31 +265,28 @@ namespace GiGaBuGaManager
 
                             try
                             {
-                                Icon fileIcon = System.Drawing.Icon.ExtractAssociatedIcon(filePath);
+                               
 
                                 // Add the icon to the ImageList and get its key
                                 string iconKey = Guid.NewGuid().ToString(); // Generate a unique key
-                                //LargeIconImage.Images.Add(iconKey, fileIcon);
+                                
 
                                 // Create a new ListViewItem
-                                ListViewItem item = new ListViewItem();
-                                item.ImageKey = iconKey; // Set the image key to the generated key
-                                item.SubItems.Add(fileName); // Add file name as sub-item
-                                item.SubItems.Add(filePath); // Add file path as sub-item
-                                item.SubItems.Add(tags);
-                                // Create a new FileItem
-                                FileItem fileItem = new FileItem(fileIcon, fileName, filePath);
-
-                                // Set the ListViewItem's Tag to the FileItem
-                                item.Tag = fileItem;
+                                ListViewItem item = new ListViewItem
+                                {
+                                    ImageKey = iconKey, // Set the image key to the generated key
+                                    Text = fileName // This will set the text for the file name column
+                                };
+                                item.ImageKey = iconKey;
+                                // Add file path and tags as sub-items
+                                item.SubItems.Add(fileName);
+                                item.SubItems.Add(filePath); // File path in the second column
+                                item.SubItems.Add(tags); // Tags in the third column
 
                                 // Add the ListViewItem to the ListView
                                 ListItemView.Items.Add(item);
-
-                                // Display a message box showing the icon, file name, and file path
-                                //MessageBox.Show($"File: {fileName}\nPath: {filePath}", "File Information",
-                                //        MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            }
+                                GigabugaFinding.Instance.AddSong(filePath, tags);
+                           }
                             catch (Exception ex)
                             {
                                 MessageBox.Show($"Error loading file: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -283,74 +351,127 @@ namespace GiGaBuGaManager
             string tagName = TagName.Text;
 
             // Add the tag using TagManager
-            TagManager.Instance.AddTag(tagName,TagFlow);
+            TagManager.Instance.AddTag(tagName,TagFlow,TagButton_Click);
         }
 
         // Method to initialize ListView columns
         private void InitializeListViewColumns()
         {
-            // Create the column headers
+            ListItemView.Columns.Clear();
+
             columnHeader1 = new ColumnHeader();
-            columnHeader1.Text = "Icon"; // Column header text for icon
-            columnHeader1.Width = 50; // Set the width of the icon column
+            columnHeader1.Text = "Icon";
+            columnHeader1.Width = 50;
 
             columnHeader2 = new ColumnHeader();
-            columnHeader2.Text = "File Name"; // Column header text for file name
-            columnHeader2.Width = 200; // Set the width of the file name column
+            columnHeader2.Text = "File Name";
+            columnHeader2.Width = 200;
 
             columnHeader3 = new ColumnHeader();
-            columnHeader3.Text = "File Path"; // Column header text for file path
-            columnHeader3.Width = 300; // Set the width of the file path column
+            columnHeader3.Text = "File Path";
+            columnHeader3.Width = 300;
 
             columnHeader4 = new ColumnHeader();
-            columnHeader4.Text = "Tags"; // Column header text for tags
-            columnHeader4.Width = 300; // Set the width of the tags column
+            columnHeader4.Text = "Tags";
+            columnHeader4.Width = 300;
 
-            // Add the column headers to the ListView
             ListItemView.Columns.AddRange(new ColumnHeader[] { columnHeader1, columnHeader2, columnHeader3, columnHeader4 });
         }
 
         private void TagButton_Click(object sender, EventArgs e)
         {
-            string tagName = ((Button)sender).Text;
+            Button tagButton = sender as Button;
+            string tagName = tagButton.Text;
 
-            foreach (ListViewItem selectedItem in ListItemView.SelectedItems)
+            if (isFindingMode)
             {
-                if (selectedItem.SubItems.Count < 4)
+                if (currentSearchTags.Contains(tagName))
                 {
-                    selectedItem.SubItems.Add("| " + tagName);
+                    currentSearchTags.Remove(tagName);
+                    tagButton.BackColor = Color.LightGray;
                 }
                 else
                 {
-                    string currentTags = selectedItem.SubItems[3].Text;
-                    List<string> tagList = currentTags.Split('|').Select(t => t.Trim()).ToList();
+                    currentSearchTags.Add(tagName);
+                    tagButton.BackColor = Color.LightGreen;
+                }
 
-                    if (!tagList.Contains(tagName))
+                ListItemView.Items.Clear();
+
+                // Fetch files matching the current search tags
+                string combinedTags = string.Join("|", currentSearchTags);
+                var matchingFiles = GigabugaFinding.Instance.FindSongs(combinedTags);
+
+                // Display matching files in the ListView
+                foreach (string filePath in matchingFiles)
+                {
+                    string fileName = Path.GetFileName(filePath);
+                    try
                     {
-                        tagList.Add(tagName);
-                        tagList = tagList.OrderBy(t => t.Split(' ')[0]).ThenBy(t => t.Length).ToList();
-                        selectedItem.SubItems[3].Text = string.Join(" | ", tagList);
+                        Icon fileIcon = Icon.ExtractAssociatedIcon(filePath);
+                        string iconKey = Guid.NewGuid().ToString();
+                        LargeIconImage.Images.Add(iconKey, fileIcon);
+
+                        ListViewItem item = new ListViewItem
+                        {
+                            ImageKey = iconKey,
+                            Text = fileName
+                        };
+                        item.ImageKey = iconKey;
+                        item.SubItems.Add(fileName);
+                        item.SubItems.Add(filePath);
+                        item.SubItems.Add(""); // Placeholder for tags
+
+                        ListItemView.Items.Add(item);
+                        
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error loading file: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+            else
+            {
+                foreach (ListViewItem selectedItem in ListItemView.SelectedItems)
+                {
+                    if (selectedItem.SubItems.Count < 4)
+                    {
+                        selectedItem.SubItems.Add("| " + tagName);
                     }
                     else
                     {
-                        MessageBox.Show("Tag already added to one or more selected files, so it will be removed.", "Duplicate Tag will be removed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        // Remove the tag if it already exists
-                        tagList.Remove(tagName);
-                        selectedItem.SubItems[3].Text = tagList.Count > 0 ? string.Join(" | ", tagList) : string.Empty;
-                    }
+                        string currentTags = selectedItem.SubItems[3].Text;
+                        List<string> tagList = currentTags.Split('|').Select(t => t.Trim()).ToList();
 
-                    // Update the tags in the file
-                    string fileName = selectedItem.SubItems[1].Text;
-                    string newTags = selectedItem.SubItems[3].Text;
-                    UpdateTags(fileName, newTags);
+                        if (!tagList.Contains(tagName))
+                        {
+                            tagList.Add(tagName);
+                            tagList = tagList.OrderBy(t => t.Split(' ')[0]).ThenBy(t => t.Length).ToList();
+                            selectedItem.SubItems[3].Text = string.Join(" | ", tagList);
+                        }
+                        else
+                        {
+                            MessageBox.Show("Tag already added to one or more selected files, so it will be removed.", "Duplicate Tag will be removed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            // Remove the tag if it already exists
+                            tagList.Remove(tagName);
+                            selectedItem.SubItems[3].Text = tagList.Count > 0 ? string.Join(" | ", tagList) : string.Empty;
+                        }
+
+                        // Update the tags in the file
+                        string fileName = selectedItem.SubItems[1].Text;
+                        string newTags = selectedItem.SubItems[3].Text;
+                        string filePath = selectedItem.SubItems[2].Text;
+                        UpdateTags(fileName, newTags);
+                        GigabugaFinding.Instance.AddSong(filePath, newTags);
+                    }
                 }
             }
-
             if (adjust)
             {
                 try
                 {
-                    if (sender is Button tagButton)
+                    if (sender is Button )
                     {
                         AdjustTag adjustTagForm = new AdjustTag(tagButton, TagFlow);
                         adjustTagForm.ShowDialog();
@@ -365,7 +486,9 @@ namespace GiGaBuGaManager
                     MessageBox.Show($"Error changing tag properties: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+
         }
+
 
         private void ListItemView_DragEnter(object sender, DragEventArgs e)
         {
@@ -383,50 +506,31 @@ namespace GiGaBuGaManager
 
         private void ListItemView_DragDrop(object sender, DragEventArgs e)
         {
-            // Hide the drag over panel when the drag and drop operation completes
             dragOverPanel.Visible = false;
-
-            // Check if the data being dragged is a file
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
-                // Get the file paths from the data
                 string[] filePaths = (string[])e.Data.GetData(DataFormats.FileDrop);
 
-                // Loop through the file paths
                 foreach (string filePath in filePaths)
                 {
-                    // Get the file name from the file path
                     string fileName = Path.GetFileName(filePath);
-
-                    // Save the file item
                     SaveFile(fileName, filePath);
 
-                    // Create a new ListViewItem
-                    ListViewItem item = new ListViewItem();
-                    item.Text = fileName; // Set the file name as the text
-
-                    // Add the file icon to the ImageList
                     Icon fileIcon = Icon.ExtractAssociatedIcon(filePath);
-                    LargeIconImage.Images.Add(fileName, fileIcon);
+                    string iconKey = Guid.NewGuid().ToString();
+                    LargeIconImage.Images.Add(iconKey, fileIcon);
 
-                    // Set the ListViewItem's ImageKey to the file name
-                    item.ImageKey = fileName;
-
-                    // Add the file path as a sub-item
+                    ListViewItem item = new ListViewItem { ImageKey = iconKey };
+                    item.SubItems.Add(fileName);
                     item.SubItems.Add(filePath);
+                    item.SubItems.Add(""); // Placeholder for tags
 
-                    // Create a new FileItem
+                    ListItemView.Items.Add(item);
                     FileItem fileItem = new FileItem(fileIcon, fileName, filePath);
-
-                    // Set the ListViewItem's Tag to the FileItem
                     item.Tag = fileItem;
 
-                    // Add the ListViewItem to the ListView
-                    ListItemView.Items.Add(item);
+                    GigabugaFinding.Instance.AddSong(filePath, null);
 
-                    // Optionally, display a message box showing the icon, file name, and file path
-                    //MessageBox.Show($"File: {fileName}\nPath: {filePath}", "File Information",
-                    //    MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
         }
@@ -450,9 +554,10 @@ namespace GiGaBuGaManager
             }
         }
 
-        private void adjustProperties_CheckedChanged_1(object sender, EventArgs e)
+        private void AdjustProperties_Click(object sender, EventArgs e)
         {
             adjust = !adjust;
+            adjustProperties.Checked = adjust;
         }
 
         private void ListItemView_SelectedIndexChanged(object sender, EventArgs e)
@@ -463,6 +568,33 @@ namespace GiGaBuGaManager
         private void Form1_Load(object sender, EventArgs e)
         {
             // Additional load logic if needed...
+        }
+
+        private void FindingMode_Click(object sender, EventArgs e)
+        {
+            isFindingMode = !isFindingMode;
+            FindingMode.Checked = isFindingMode;
+
+            // Update the appearance of tag buttons based on finding mode
+            foreach (Button tagButton in TagFlow.Controls.OfType<Button>())
+            {
+                if (isFindingMode)
+                {
+                    tagButton.BackColor = currentSearchTags.Contains(tagButton.Text) ? Color.LightGreen : Color.LightGray;
+                }
+                else
+                {
+                    tagButton.BackColor = Color.FromKnownColor(KnownColor.Control);
+                }
+            }
+
+            // Clear the current search tags if exiting finding mode
+            if (!isFindingMode)
+            {
+                currentSearchTags.Clear();
+                ListItemView.Items.Clear();  // Clear the list view when exiting finding mode
+                LoadFileItems();  // Reload all file items
+            }
         }
     }
 }

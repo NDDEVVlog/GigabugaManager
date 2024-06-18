@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AdditionClass\GigabugaFinding.cs" />
     <Compile Include="AdditionClass\Tag.cs" />
     <Compile Include="AdditionClass\TagManager.cs" />
     <Compile Include="AdjustTag.cs">
