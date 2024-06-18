@@ -35,10 +35,7 @@ namespace GiGaBuGaManager.AdditionClass
 
         public void AddSong(string song, string tags)
         {
-            /*if (string.IsNullOrEmpty(song) || string.IsNullOrEmpty(tags))
-            {
-                throw new ArgumentException("Song and tags must not be empty.");
-            }*/
+            
             if (tags == null) return;
 
             var tagSet = new HashSet<string>(tags.Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries)

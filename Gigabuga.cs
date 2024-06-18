@@ -541,7 +541,7 @@ namespace GiGaBuGaManager
 
             if (selectedItem != null)
             {
-                string filePath = selectedItem.SubItems[1].Text;
+                string filePath = selectedItem.SubItems[2].Text;
 
                 try
                 {
@@ -549,7 +549,7 @@ namespace GiGaBuGaManager
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error opening file: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Error opening file: {ex.Message} at {filePath}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
