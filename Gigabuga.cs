@@ -19,7 +19,7 @@ namespace GiGaBuGaManager
 
         private Panel dragOverPanel;
         private ImageList LargeIconImage;
-        private string fileItemsPath = "FileItem.txt"; // Path to the file item storage
+        
 
         private bool adjust = false;
         #endregion
@@ -73,8 +73,8 @@ namespace GiGaBuGaManager
             // Load tags and file items
             TagManager.Instance.LoadTags(TagFlow,TagButton_Click);
             TagManager.Instance.gigabuga = this;
-            LoadFileItems();
-            LoadFileFormats();
+            FileManager.Instance.LoadFileItems(ListItemView, LargeIconImage);
+            FileManager.Instance.LoadFileFormats(FileFormatSelection); 
             FileFormatSelection.Items.Add("None");
             // Create and add the drag over panel
             dragOverPanel = CreateDragOverPanel();
@@ -85,7 +85,7 @@ namespace GiGaBuGaManager
 
         #region Save and Load
         // Method to save a file item and its format
-        private void SaveFile(string fileName, string filePath, string tags = "")
+        /*private void SaveFile(string fileName, string filePath, string tags = "")
         {
             // Determine the file format
             string fileFormat = Path.GetExtension(fileName).TrimStart('.').ToUpper();
@@ -218,7 +218,7 @@ namespace GiGaBuGaManager
             }
 
             // Update tags in the ListView
-            LoadFileItems();
+            FileManager.Instance.LoadFileItems(ListItemView, LargeIconImage);  // Reload all file items
         }
 
         private void LoadFileFormats()
@@ -335,7 +335,7 @@ namespace GiGaBuGaManager
 
             // Update tags in the format-specific file
             UpdateTagsInFile(formatFilePath);
-        }
+        }*/
         #endregion
 
         // Other methods and event handlers...
@@ -462,7 +462,8 @@ namespace GiGaBuGaManager
                         string fileName = selectedItem.SubItems[1].Text;
                         string newTags = selectedItem.SubItems[3].Text;
                         string filePath = selectedItem.SubItems[2].Text;
-                        UpdateTags(fileName, newTags);
+                        FileManager.Instance.UpdateTags(fileName, newTags);
+                        //UpdateTags(fileName, newTags);
                         GigabugaFinding.Instance.AddSong(filePath, newTags);
                     }
                 }
@@ -514,7 +515,7 @@ namespace GiGaBuGaManager
                 foreach (string filePath in filePaths)
                 {
                     string fileName = Path.GetFileName(filePath);
-                    SaveFile(fileName, filePath);
+                    FileManager.Instance.SaveFile(fileName, filePath);
 
                     Icon fileIcon = Icon.ExtractAssociatedIcon(filePath);
                     string iconKey = Guid.NewGuid().ToString();
@@ -593,7 +594,7 @@ namespace GiGaBuGaManager
             {
                 currentSearchTags.Clear();
                 ListItemView.Items.Clear();  // Clear the list view when exiting finding mode
-                LoadFileItems();  // Reload all file items
+                FileManager.Instance.LoadFileItems(ListItemView, LargeIconImage);  // Reload all file items
             }
         }
     }

@@ -8,6 +8,7 @@ namespace GiGaBuGaManager
     {
         private Button myButton;
         private FlowLayoutPanel flow;
+        
         public AdjustTag(Button inputbutton,FlowLayoutPanel flow)
         {
             InitializeComponent();
@@ -38,7 +39,7 @@ namespace GiGaBuGaManager
             if (colorDialog1.ShowDialog() == DialogResult.OK)
             {
                 Color color = colorDialog1.Color;
-                myButton.BackColor = color;
+                
                 buttonBackgroundColor.BackColor = color;
             }
         }
@@ -48,19 +49,16 @@ namespace GiGaBuGaManager
             if (colorDialog1.ShowDialog() == DialogResult.OK)
             {
                 Color color = colorDialog1.Color;
-                myButton.FlatAppearance.BorderColor = color;
+               
                 buttonButtonColor.BackColor = color;
             }
         }
 
         private void SaveButtonClick(object sender, EventArgs e)
         {
-            // Rename the tag and save
-            string oldTagName = myButton.Text;
-            string newTagName = TagName.Text.Trim();
-
-           
-
+            myButton.BackColor = buttonBackgroundColor.BackColor;
+            myButton.FlatAppearance.BorderColor = buttonButtonColor.BackColor;
+            myButton.ForeColor = TagName.ForeColor;
             // Save the tags
             TagManager.Instance.SaveTags(flow);
             this.Close();
@@ -92,6 +90,7 @@ namespace GiGaBuGaManager
             
 
             TagManager.Instance.RenameTag(oldName, TagName.Text, flow);
+            TagManager.Instance.SaveTags(flow);
         }
     }
 }

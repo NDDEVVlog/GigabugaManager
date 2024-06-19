@@ -16,6 +16,7 @@ namespace GiGaBuGaManager.AdditionClass
         private static readonly object padlock = new object();
         private readonly string tagsFilePath = "Tags.txt";
 
+        
 
         public Gigabuga gigabuga;
         /// <summary>
@@ -54,10 +55,10 @@ namespace GiGaBuGaManager.AdditionClass
                     foreach (Button tagButton in tagFlow.Controls.OfType<Button>())
                     {
                         string tagName = tagButton.Text;
-                        Color buttonColor = tagButton.BackColor;
+                        Color buttonColor = tagButton.FlatAppearance.BorderColor;
                         Color backgroundColor = tagButton.BackColor;
                         Color textColor = tagButton.ForeColor;
-
+                        
                         string tagInfo = $"{tagName},{buttonColor.ToArgb()},{backgroundColor.ToArgb()},{textColor.ToArgb()}";
                         writer.WriteLine(tagInfo);
                     }
@@ -93,7 +94,7 @@ namespace GiGaBuGaManager.AdditionClass
                                 Color buttonColor = Color.FromArgb(int.Parse(parts[1]));
                                 Color backgroundColor = Color.FromArgb(int.Parse(parts[2]));
                                 Color textColor = Color.FromArgb(int.Parse(parts[3]));
-
+                                Color borderColor= Color.FromArgb(int.Parse(parts[3]));
                                 // Create and add the button to the panel
                                 AddTagButton(tagFlow, tagName, buttonColor, backgroundColor, textColor, tagButtonClick);
                             }
@@ -221,8 +222,8 @@ namespace GiGaBuGaManager.AdditionClass
 
                 // Optionally dispose the button to free resources
                 tagButton.Dispose();
-
-                gigabuga.RemoveTagFromFileItems(tagName);
+                
+                FileManager.Instance.RemoveTagFromFileItems(tagName);
                 // Save the updated tags
                 SaveTags(tagFlow);
             }
@@ -262,7 +263,7 @@ namespace GiGaBuGaManager.AdditionClass
                     // Update the tag name
                     var oldName = tagButton.Text;
                     tagButton.Text = newTagName;
-                    gigabuga.UpdateTagInFileItems(oldName, tagButton.Text);
+                    FileManager.Instance.UpdateTagInFileItems(oldName, tagButton.Text);
                     // Save the updated tags
                     SaveTags(tagFlow);
                 }
