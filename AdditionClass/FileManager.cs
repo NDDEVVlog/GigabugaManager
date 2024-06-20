@@ -202,6 +202,8 @@ namespace GiGaBuGaManager.AdditionClass
                                 item.SubItems.Add(tags);
 
                                 listView.Items.Add(item);
+
+                                GigabugaFinding.Instance.AddSong(filePath, tags);
                             }
                             catch (Exception ex)
                             {

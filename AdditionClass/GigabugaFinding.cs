@@ -74,5 +74,15 @@ namespace GiGaBuGaManager.AdditionClass
                 Console.WriteLine($"{song.Key}: {string.Join(", ", song.Value)}");
             }
         }
+
+        public override bool Equals(object obj)
+        {
+            return base.Equals(obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }
